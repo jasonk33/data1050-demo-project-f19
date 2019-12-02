@@ -19,6 +19,7 @@ MAX_DOWNLOAD_ATTEMPT = 5
 DOWNLOAD_PERIOD = 10         # second
 logger = logging.Logger(__name__)
 utils.setup_logger(logger, 'data.log')
+CITIES = ["Providence"]
 
 
 def download_bpa(url=BPA_SOURCE, retries=MAX_DOWNLOAD_ATTEMPT):
@@ -51,7 +52,7 @@ def download_weather(city, url=WEATHER_BASE_URL, retries=MAX_DOWNLOAD_ATTEMPT):
         except requests.exceptions.HTTPError as e:
             logger.warning("Retry on HTTP Error: {}".format(e))
     if text is None:
-        logger.error('download_bpa too many FAILED attempts')
+        logger.error('download_weather too many FAILED attempts')
     return text
 
 
@@ -90,6 +91,8 @@ def main_loop(timeout=DOWNLOAD_PERIOD):
     def _worker():
         try:
             update_once()
+            for city in CITIES:
+                update_weather_once(city)
         except Exception as e:
             logger.warning("main loop worker ignores exception and continues: {}".format(e))
         scheduler.enter(timeout, 1, _worker)    # schedule the next event
