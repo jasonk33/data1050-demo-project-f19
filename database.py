@@ -29,13 +29,41 @@ def upsert_bpa(df):
                 "insert={}".format(df.shape[0]-update_count))
 
 
+def upsert_weather(weather_dict):
+    """
+    Update MongoDB database `weather` and collection for city with the given `weather_dict`.
+    """
+    db = client.get_database("weather")
+    city_name = weather_dict["name"]
+    collection = db.get_collection(city_name)
+    update_count = 0
+    result = collection.replace_one(
+        filter={'dt': record['dt']},
+        replacement=weather_dict,                     
+        upsert=True)             
+
+
 def fetch_all_bpa():
     db = client.get_database("energy")
     collection = db.get_collection("energy")
     return list(collection.find())
 
+def fetch_all_weather(city="ALL"):
+    db = client.get_database("weather")
+    collections = []
+    if city == "ALL":
+        for city_name in db.collection_names():
+            collection = db.get_collection(city_name)
+            collections.extend(list(collection.find()))
+    else:
+        collection = db.get_collection(city_name)
+        return list(collection.find())
+
 
 _fetch_all_bpa_as_df_cache = expiringdict.ExpiringDict(max_len=1,
+                                                       max_age_seconds=RESULT_CACHE_EXPIRATION)
+
+_fetch_all_weather_cache = expiringdict.ExpiringDict(max_len=1,
                                                        max_age_seconds=RESULT_CACHE_EXPIRATION)
 
 
