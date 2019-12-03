@@ -4,7 +4,7 @@ import dash_html_components as html
 import numpy as np
 import plotly.graph_objects as go
 
-from database import fetch_all_bpa_as_df
+from database import fetch_all_bpa_as_df, fetch_all_weather
 
 # Definitions of constants. This projects uses extra CSS stylesheet at `./assets/style.css`
 COLORS = ['rgb(67,67,67)', 'rgb(115,115,115)', 'rgb(49,130,189)', 'rgb(189,189,189)']
@@ -134,6 +134,31 @@ def what_if_tool():
         ], className='three columns', style={'marginLeft': 5, 'marginTop': '10%'}),
     ], className='row eleven columns')
 
+def what_if_tool_weather():
+    """
+    Returns the What-If tool as a dash `html.Div`. The view is a 8:3 division between
+    demand-supply plot and rescale sliders.
+    """
+    return html.Div(children=[
+        html.Div(children=[dcc.Graph(id='what-if-figure-weather')], className='nine columns'),
+
+        html.Div(children=[
+            html.H5("Rescale Something", style={'marginTop': '2rem'}),
+            html.Div(children=[
+                dcc.Slider(id='wind-scale-slider-weather', min=0, max=4, step=0.1, value=2.5, className='row',
+                           marks={x: str(x) for x in np.arange(0, 4.1, 1)})
+            ], style={'marginTop': '5rem'}),
+
+            html.Div(id='wind-scale-text-weather', style={'marginTop': '1rem'}),
+
+            html.Div(children=[
+                dcc.Slider(id='hydro-scale-slider-weather', min=0, max=4, step=0.1, value=0,
+                           className='row', marks={x: str(x) for x in np.arange(0, 4.1, 1)})
+            ], style={'marginTop': '3rem'}),
+            html.Div(id='hydro-scale-text-weather', style={'marginTop': '1rem'}),
+        ], className='three columns', style={'marginLeft': 5, 'marginTop': '10%'}),
+    ], className='row eleven columns')
+
 
 def architecture_summary():
     """
@@ -172,6 +197,7 @@ app.layout = html.Div([
     dcc.Graph(id='stacked-trend-graph', figure=static_stacked_trend_graph(stack=True)),
     what_if_description(),
     what_if_tool(),
+    what_if_tool_weather(),
     architecture_summary(),
 ], className='row', id='content')
 
@@ -185,11 +211,25 @@ def update_wind_sacle_text(value):
     """Changes the display text of the wind slider"""
     return "Wind Power Scale {:.2f}x".format(value)
 
+@app.callback(
+    dash.dependencies.Output('wind-scale-text-weather', 'children'),
+    [dash.dependencies.Input('wind-scale-slider-weather', 'value')])
+def update_wind_sacle_text_weather(value):
+    """Changes the display text of the wind slider"""
+    return "Wind Power Scale {:.2f}x".format(value)
+
 
 @app.callback(
     dash.dependencies.Output('hydro-scale-text', 'children'),
     [dash.dependencies.Input('hydro-scale-slider', 'value')])
 def update_hydro_sacle_text(value):
+    """Changes the display text of the hydro slider"""
+    return "Hydro Power Scale {:.2f}x".format(value)
+
+@app.callback(
+    dash.dependencies.Output('hydro-scale-text-weather', 'children'),
+    [dash.dependencies.Input('hydro-scale-slider-weather', 'value')])
+def update_hydro_sacle_text_weather(value):
     """Changes the display text of the hydro slider"""
     return "Hydro Power Scale {:.2f}x".format(value)
 
@@ -213,6 +253,31 @@ def what_if_handler(wind, hydro):
                   fill='tozeroy'))
     fig.add_trace(go.Scatter(x=x, y=load, mode='none', name='demand', line={'width': 2, 'color': 'orange'},
                   fill='tonexty'))
+    fig.update_layout(template='plotly_dark', title='Supply/Demand after Power Scaling',
+                      plot_bgcolor='#23272c', paper_bgcolor='#23272c', yaxis_title='MW',
+                      xaxis_title='Date/Time')
+    return fig
+
+
+@app.callback(
+    dash.dependencies.Output('what-if-figure-weather', 'figure'),
+    [dash.dependencies.Input('wind-scale-slider-weather', 'value'),
+     dash.dependencies.Input('hydro-scale-slider-weather', 'value')])
+def what_if_handler_weather(wind, hydro):
+    """Changes the display graph of supply-demand"""
+    weather_dicts = fetch_all_weather(city="Providence")
+    weather_dicts = sorted(weather_dicts, key=lambda weather_dict: weather_dict['dt'])
+    temps = [weather_dict['main']['temp'] for weather_dict in weather_dicts]
+    x = [weather_dict['dt'] for weather_dict in weather_dicts]
+    # x = df['Datetime']
+    # supply = df['Wind'] * wind + df['Hydro'] * hydro + df['Fossil/Biomass'] + df['Nuclear']
+    # load = df['Load']
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=x, y=temps, mode='none', name='temps', line={'width': 2, 'color': 'pink'},
+                  fill='tozeroy'))
+    # fig.add_trace(go.Scatter(x=x, y=load, mode='none', name='demand', line={'width': 2, 'color': 'orange'},
+    #               fill='tonexty'))
     fig.update_layout(template='plotly_dark', title='Supply/Demand after Power Scaling',
                       plot_bgcolor='#23272c', paper_bgcolor='#23272c', yaxis_title='MW',
                       xaxis_title='Date/Time')

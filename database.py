@@ -57,7 +57,7 @@ def fetch_all_weather(city="ALL"):
             collection = db.get_collection(city_name)
             collections.extend(list(collection.find()))
     else:
-        collection = db.get_collection(city_name)
+        collection = db.get_collection(city)
         return list(collection.find())
 
 
