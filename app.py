@@ -5,6 +5,7 @@ import numpy as np
 import plotly.graph_objects as go
 
 from database import fetch_all_bpa_as_df, fetch_all_weather
+from data_acquire import CITIES
 
 # Definitions of constants. This projects uses extra CSS stylesheet at `./assets/style.css`
 COLORS = ['rgb(67,67,67)', 'rgb(115,115,115)', 'rgb(49,130,189)', 'rgb(189,189,189)']
@@ -145,6 +146,10 @@ def what_if_tool_weather():
         html.Div(children=[
             html.H5("Rescale Something", style={'marginTop': '2rem'}),
             html.Div(children=[
+                # dcc.RadioItems(id='measurement-radio-items', 
+                # options=[{'label': 'Temperature', 'value': 'temp'}],
+                # className='row',
+                # value='Providence')
                 dcc.Slider(id='wind-scale-slider-weather', min=0, max=4, step=0.1, value=2.5, className='row',
                            marks={x: str(x) for x in np.arange(0, 4.1, 1)})
             ], style={'marginTop': '5rem'}),
@@ -152,10 +157,14 @@ def what_if_tool_weather():
             html.Div(id='wind-scale-text-weather', style={'marginTop': '1rem'}),
 
             html.Div(children=[
-                dcc.Slider(id='hydro-scale-slider-weather', min=0, max=4, step=0.1, value=0,
-                           className='row', marks={x: str(x) for x in np.arange(0, 4.1, 1)})
+                dcc.RadioItems(id='city-radio-items', 
+                options=[{'label': city, 'value': city} for city in CITIES],
+                className='row',
+                value='Providence')
+                # dcc.Slider(id='hydro-scale-slider-weather', min=0, max=4, step=0.1, value=0,
+                #            className='row', marks={x: str(x) for x in np.arange(0, 4.1, 1)})
             ], style={'marginTop': '3rem'}),
-            html.Div(id='hydro-scale-text-weather', style={'marginTop': '1rem'}),
+            html.Div(id='city-text', style={'marginTop': '1rem'}),
         ], className='three columns', style={'marginLeft': 5, 'marginTop': '10%'}),
     ], className='row eleven columns')
 
@@ -227,11 +236,11 @@ def update_hydro_sacle_text(value):
     return "Hydro Power Scale {:.2f}x".format(value)
 
 @app.callback(
-    dash.dependencies.Output('hydro-scale-text-weather', 'children'),
-    [dash.dependencies.Input('hydro-scale-slider-weather', 'value')])
-def update_hydro_sacle_text_weather(value):
+    dash.dependencies.Output('city-text', 'children'),
+    [dash.dependencies.Input('city-radio-items', 'value')])
+def update_city_radio_items(value):
     """Changes the display text of the hydro slider"""
-    return "Hydro Power Scale {:.2f}x".format(value)
+    return "City: {}".format(value)
 
 
 _what_if_data_cache = None
@@ -262,10 +271,10 @@ def what_if_handler(wind, hydro):
 @app.callback(
     dash.dependencies.Output('what-if-figure-weather', 'figure'),
     [dash.dependencies.Input('wind-scale-slider-weather', 'value'),
-     dash.dependencies.Input('hydro-scale-slider-weather', 'value')])
-def what_if_handler_weather(wind, hydro):
+     dash.dependencies.Input('city-radio-items', 'value')])
+def what_if_handler_weather(wind, city):
     """Changes the display graph of supply-demand"""
-    weather_dicts = fetch_all_weather(city="Providence")
+    weather_dicts = fetch_all_weather(city=city)
     weather_dicts = sorted(weather_dicts, key=lambda weather_dict: weather_dict['dt'])
     temps = [weather_dict['main']['temp'] for weather_dict in weather_dicts]
     x = [weather_dict['dt'] for weather_dict in weather_dicts]
@@ -278,8 +287,8 @@ def what_if_handler_weather(wind, hydro):
                   fill='tozeroy'))
     # fig.add_trace(go.Scatter(x=x, y=load, mode='none', name='demand', line={'width': 2, 'color': 'orange'},
     #               fill='tonexty'))
-    fig.update_layout(template='plotly_dark', title='Supply/Demand after Power Scaling',
-                      plot_bgcolor='#23272c', paper_bgcolor='#23272c', yaxis_title='MW',
+    fig.update_layout(template='plotly_dark', title="Temperature in {}".format(city),
+                      plot_bgcolor='#23272c', paper_bgcolor='#23272c', yaxis_title='Temperature',
                       xaxis_title='Date/Time')
     return fig
 
