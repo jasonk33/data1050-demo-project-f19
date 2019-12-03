@@ -16,7 +16,7 @@ API_KEY = "eb0b9ddfad9c74ffb30cffe72e9ad2c8"
 WEATHER_BASE_URL = "http://api.openweathermap.org/data/2.5/weather?units=imperial&APPID={}&q=".format(API_KEY)
 BPA_SOURCE = "https://transmission.bpa.gov/business/operations/Wind/baltwg.txt"
 MAX_DOWNLOAD_ATTEMPT = 5
-DOWNLOAD_PERIOD = 10         # second
+DOWNLOAD_PERIOD = 60         # second
 logger = logging.Logger(__name__)
 utils.setup_logger(logger, 'data.log')
 CITIES = ["Providence", "Miami", "Dallas", "Seattle"]
@@ -45,7 +45,7 @@ def download_weather(city, url=WEATHER_BASE_URL, retries=MAX_DOWNLOAD_ATTEMPT):
     """
     full_url = WEATHER_BASE_URL + city
     text = None
-    for i in range(retries):
+    for _ in range(retries):
         try:
             req = requests.get(full_url, timeout=0.5)
             req.raise_for_status()
