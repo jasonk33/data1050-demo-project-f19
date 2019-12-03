@@ -18,3 +18,4 @@
 !.jupyter/*.py
 !doc/
 !doc/*.png
+!.gitpod.dockerfile
