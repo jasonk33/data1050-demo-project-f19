@@ -36,12 +36,11 @@ def upsert_weather(weather_dict):
     db = client.get_database("weather")
     city_name = weather_dict["name"]
     collection = db.get_collection(city_name)
-    update_count = 0
     result = collection.replace_one(
         filter={'dt': weather_dict['dt']},
         replacement=weather_dict,                     
         upsert=True)        
-    logger.info("Updates={}, Insert={}".format(len(list(collection.find())), result.matched_count == 0))
+    logger.info("City: {}, Total Data Points: {}, Update: {}".format(city_name, len(list(collection.find())), result.matched_count == 0))
 
 
 def fetch_all_bpa():

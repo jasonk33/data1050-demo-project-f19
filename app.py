@@ -295,7 +295,7 @@ def what_if_handler_weather(measurement, city):
     # load = df['Load']
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=x, y=measurement_values, mode='none', name='measurements', line={'width': 2, 'color': 'pink'},
+    fig.add_trace(go.Scatter(x=x, y=measurement_values, mode='lines+markers', name='measurements', line={'width': 2, 'color': 'pink'},
                   fill='tozeroy'))
     # fig.add_trace(go.Scatter(x=x, y=load, mode='none', name='demand', line={'width': 2, 'color': 'orange'},
     #               fill='tonexty'))
