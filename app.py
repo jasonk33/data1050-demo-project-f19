@@ -10,6 +10,10 @@ from data_acquire import CITIES
 # Definitions of constants. This projects uses extra CSS stylesheet at `./assets/style.css`
 COLORS = ['rgb(67,67,67)', 'rgb(115,115,115)', 'rgb(49,130,189)', 'rgb(189,189,189)']
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css', '/assets/style.css']
+TEMPERATURE = "Temperature"
+WIND = "Wind"
+PRESSURE = "Pressure"
+HUMIDITY = "Humidity"
 
 # Define the dash app first
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -144,18 +148,19 @@ def what_if_tool_weather():
         html.Div(children=[dcc.Graph(id='what-if-figure-weather')], className='nine columns'),
 
         html.Div(children=[
-            html.H5("Rescale Something", style={'marginTop': '2rem'}),
+            html.H5("Change Measurement", style={'marginTop': '2rem'}),
             html.Div(children=[
-                # dcc.RadioItems(id='measurement-radio-items', 
-                # options=[{'label': 'Temperature', 'value': 'temp'}],
-                # className='row',
-                # value='Providence')
-                dcc.Slider(id='wind-scale-slider-weather', min=0, max=4, step=0.1, value=2.5, className='row',
-                           marks={x: str(x) for x in np.arange(0, 4.1, 1)})
+                dcc.RadioItems(id='measurement-radio-items', 
+                options=[{'label': TEMPERATURE, 'value': TEMPERATURE}, {'label': WIND, 'value': WIND}, {'label': PRESSURE, 'value': PRESSURE}, {'label': HUMIDITY, 'value': HUMIDITY}],
+                className='row',
+                value=TEMPERATURE)
+                # dcc.Slider(id='wind-scale-slider-weather', min=0, max=4, step=0.1, value=2.5, className='row',
+                #            marks={x: str(x) for x in np.arange(0, 4.1, 1)})
             ], style={'marginTop': '5rem'}),
 
-            html.Div(id='wind-scale-text-weather', style={'marginTop': '1rem'}),
+            html.Div(id='measurement-text', style={'marginTop': '1rem'}),
 
+            html.H5("Change City", style={'marginTop': '2rem'}),
             html.Div(children=[
                 dcc.RadioItems(id='city-radio-items', 
                 options=[{'label': city, 'value': city} for city in CITIES],
@@ -221,11 +226,11 @@ def update_wind_sacle_text(value):
     return "Wind Power Scale {:.2f}x".format(value)
 
 @app.callback(
-    dash.dependencies.Output('wind-scale-text-weather', 'children'),
-    [dash.dependencies.Input('wind-scale-slider-weather', 'value')])
-def update_wind_sacle_text_weather(value):
+    dash.dependencies.Output('measurement-text', 'children'),
+    [dash.dependencies.Input('measurement-radio-items', 'value')])
+def update_measurement_radio_items(value):
     """Changes the display text of the wind slider"""
-    return "Wind Power Scale {:.2f}x".format(value)
+    return "Measurement: {}".format(value)
 
 
 @app.callback(
@@ -270,25 +275,32 @@ def what_if_handler(wind, hydro):
 
 @app.callback(
     dash.dependencies.Output('what-if-figure-weather', 'figure'),
-    [dash.dependencies.Input('wind-scale-slider-weather', 'value'),
+    [dash.dependencies.Input('measurement-radio-items', 'value'),
      dash.dependencies.Input('city-radio-items', 'value')])
-def what_if_handler_weather(wind, city):
+def what_if_handler_weather(measurement, city):
     """Changes the display graph of supply-demand"""
     weather_dicts = fetch_all_weather(city=city)
     weather_dicts = sorted(weather_dicts, key=lambda weather_dict: weather_dict['dt'])
-    temps = [weather_dict['main']['temp'] for weather_dict in weather_dicts]
+    if measurement == TEMPERATURE:
+        measurement_values = [weather_dict['main']['temp'] for weather_dict in weather_dicts]
+    elif measurement == WIND:
+        measurement_values = [weather_dict['wind']['speed'] for weather_dict in weather_dicts]
+    elif measurement == PRESSURE:
+        measurement_values = [weather_dict['main']['pressure'] for weather_dict in weather_dicts]
+    elif measurement == HUMIDITY:
+        measurement_values = [weather_dict['main']['humidity'] for weather_dict in weather_dicts]
     x = [weather_dict['dt'] for weather_dict in weather_dicts]
     # x = df['Datetime']
     # supply = df['Wind'] * wind + df['Hydro'] * hydro + df['Fossil/Biomass'] + df['Nuclear']
     # load = df['Load']
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=x, y=temps, mode='none', name='temps', line={'width': 2, 'color': 'pink'},
+    fig.add_trace(go.Scatter(x=x, y=measurement_values, mode='none', name='measurements', line={'width': 2, 'color': 'pink'},
                   fill='tozeroy'))
     # fig.add_trace(go.Scatter(x=x, y=load, mode='none', name='demand', line={'width': 2, 'color': 'orange'},
     #               fill='tonexty'))
-    fig.update_layout(template='plotly_dark', title="Temperature in {}".format(city),
-                      plot_bgcolor='#23272c', paper_bgcolor='#23272c', yaxis_title='Temperature',
+    fig.update_layout(template='plotly_dark', title="{} in {}".format(measurement, city),
+                      plot_bgcolor='#23272c', paper_bgcolor='#23272c', yaxis_title=measurement,
                       xaxis_title='Date/Time')
     return fig
 

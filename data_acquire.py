@@ -19,7 +19,7 @@ MAX_DOWNLOAD_ATTEMPT = 5
 DOWNLOAD_PERIOD = 10         # second
 logger = logging.Logger(__name__)
 utils.setup_logger(logger, 'data.log')
-CITIES = ["Providence", "Miami"]
+CITIES = ["Providence", "Miami", "Dallas", "Seattle"]
 UTC_TO_EASTERN_SECONDS = 18000
 
 
