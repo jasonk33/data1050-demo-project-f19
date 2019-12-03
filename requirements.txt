@@ -2,10 +2,10 @@ dash
 matplotlib
 numpy
 pandas
+json
 plotly
 pymongo
 requests
 ipywidgets
 notebook
 expiringdict
-json
