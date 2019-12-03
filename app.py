@@ -4,7 +4,7 @@ import dash_html_components as html
 import numpy as np
 import plotly.graph_objects as go
 
-from database import fetch_all_bpa_as_df, fetch_all_weather
+from database import fetch_all_weather#, fetch_all_bpa_as_df
 from data_acquire import CITIES
 
 # Definitions of constants. This projects uses extra CSS stylesheet at `./assets/style.css`
