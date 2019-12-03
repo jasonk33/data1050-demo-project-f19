@@ -2,7 +2,6 @@ dash
 matplotlib
 numpy
 pandas
-json
 plotly
 pymongo
 requests
