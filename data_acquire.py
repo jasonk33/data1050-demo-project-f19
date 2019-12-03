@@ -20,6 +20,7 @@ DOWNLOAD_PERIOD = 10         # second
 logger = logging.Logger(__name__)
 utils.setup_logger(logger, 'data.log')
 CITIES = ["Providence"]
+UTC_TO_EASTERN_SECONDS = 18000
 
 
 def download_bpa(url=BPA_SOURCE, retries=MAX_DOWNLOAD_ATTEMPT):
@@ -71,7 +72,7 @@ def filter_weather(text):
     """Converts `text` to `JSON` (dictionary), converts time to datetime
     """
     weather_dict = json.loads(text)
-    weather_dict['dt'] = pandas.to_datetime(weather_dict['dt'], unit='s')
+    weather_dict['dt'] = pandas.to_datetime(weather_dict['dt'] - UTC_TO_EASTERN_SECONDS, unit='s')
     return weather_dict
 
 def update_once():
