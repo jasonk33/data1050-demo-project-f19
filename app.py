@@ -149,7 +149,7 @@ def what_if_tool_weather():
 
         html.Div(children=[
             html.H5("Change Measurement", style={'marginTop': '2rem'}),
-            html.Div(children=[
+            html.Div(children=[  
                 dcc.RadioItems(id='measurement-radio-items', 
                 options=[{'label': TEMPERATURE, 'value': TEMPERATURE}, {'label': WIND, 'value': WIND}, {'label': PRESSURE, 'value': PRESSURE}, {'label': HUMIDITY, 'value': HUMIDITY}],
                 className='row',
@@ -162,10 +162,16 @@ def what_if_tool_weather():
 
             html.H5("Change City", style={'marginTop': '2rem'}),
             html.Div(children=[
-                dcc.RadioItems(id='city-radio-items', 
-                options=[{'label': city, 'value': city} for city in CITIES],
-                className='row',
-                value='Providence')
+                dcc.Checklist(
+                    id='city-radio-items',
+                    options=[{'label': city, 'value': city} for city in CITIES],
+                    className='row',
+                    value=[CITIES[0]]
+                )
+                # dcc.RadioItems(id='city-radio-items', 
+                # options=[{'label': city, 'value': city} for city in CITIES],
+                # className='row',
+                # value='Providence')
                 # dcc.Slider(id='hydro-scale-slider-weather', min=0, max=4, step=0.1, value=0,
                 #            className='row', marks={x: str(x) for x in np.arange(0, 4.1, 1)})
             ], style={'marginTop': '3rem'}),
@@ -277,29 +283,56 @@ _what_if_data_cache = None
     dash.dependencies.Output('what-if-figure-weather', 'figure'),
     [dash.dependencies.Input('measurement-radio-items', 'value'),
      dash.dependencies.Input('city-radio-items', 'value')])
-def what_if_handler_weather(measurement, city):
+def what_if_handler_weather(measurement, cities):
     """Changes the display graph of supply-demand"""
-    weather_dicts = fetch_all_weather(city=city)
-    weather_dicts = sorted(weather_dicts, key=lambda weather_dict: weather_dict['dt'])
-    if measurement == TEMPERATURE:
-        measurement_values = [weather_dict['main']['temp'] for weather_dict in weather_dicts]
-    elif measurement == WIND:
-        measurement_values = [weather_dict['wind']['speed'] for weather_dict in weather_dicts]
-    elif measurement == PRESSURE:
-        measurement_values = [weather_dict['main']['pressure'] for weather_dict in weather_dicts]
-    elif measurement == HUMIDITY:
-        measurement_values = [weather_dict['main']['humidity'] for weather_dict in weather_dicts]
-    x = [weather_dict['dt'] for weather_dict in weather_dicts]
+    fig = go.Figure()
+    measurement_to_color_dict = {TEMPERATURE: "255,0,0", WIND: "0,255,0", PRESSURE: "100,0,100", HUMIDITY: "0,0,255"}
+    city_to_color_dict = {CITIES[0]: "purple", CITIES[1]: "black", CITIES[2]: "white", CITIES[3]: "yellow"}
+
+    if cities == []:
+        cities = [CITIES[0]]
+    for city in cities:
+        weather_dicts = fetch_all_weather(city=city)
+        weather_dicts = sorted(weather_dicts, key=lambda weather_dict: weather_dict['dt'])
+        if measurement == TEMPERATURE:
+            measurement_values = [weather_dict['main']['temp'] for weather_dict in weather_dicts]
+        elif measurement == WIND:
+            measurement_values = [weather_dict['wind']['speed'] for weather_dict in weather_dicts]
+        elif measurement == PRESSURE:
+            measurement_values = [weather_dict['main']['pressure'] for weather_dict in weather_dicts]
+        elif measurement == HUMIDITY:
+            measurement_values = [weather_dict['main']['humidity'] for weather_dict in weather_dicts]
+        x = [weather_dict['dt'] for weather_dict in weather_dicts]
+        
+        fig.add_trace(go.Scatter(x=x, y=measurement_values, mode='lines+markers', name=city, line={'width': 2, 'color': "rgb({})".format(measurement_to_color_dict[measurement])},
+                  fill='tozeroy', fillcolor="rgba({},0.25)".format(measurement_to_color_dict[measurement]), marker={'color': city_to_color_dict[city]}))
+
+
     # x = df['Datetime']
     # supply = df['Wind'] * wind + df['Hydro'] * hydro + df['Fossil/Biomass'] + df['Nuclear']
     # load = df['Load']
 
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=x, y=measurement_values, mode='lines+markers', name='measurements', line={'width': 2, 'color': 'pink'},
-                  fill='tozeroy'))
+    
+
     # fig.add_trace(go.Scatter(x=x, y=load, mode='none', name='demand', line={'width': 2, 'color': 'orange'},
     #               fill='tonexty'))
-    fig.update_layout(template='plotly_dark', title="{} in {}".format(measurement, city),
+
+#     city_to_image_dict = {"Miami": "https://res.cloudinary.com/teepublic/image/private/s--LqGsRI4Y--/t_Preview/b_rgb:ffffff,c_limit,f_jpg,h_630,q_90,w_630/v1478276827/production/designs/771777_1.jpg", 
+#     "Providence": "http://townmapsusa.com/images/maps/map_of_providence_ri.jpg", 
+#     PRESSURE: "orange", HUMIDITY: "green"}
+#     fig.add_layout_image(
+#     dict(
+#         source=city_to_image_dict[city],
+#         x=1, y=1,
+#         sizex=0.5, sizey=0.5,
+#         xanchor="middle", yanchor="middle"
+#     )
+# )
+    title = "{} in {}".format(measurement, cities[0])
+    if len(cities) > 1:
+        for city in cities[1:]:
+            title = title + " and {}".format(city)
+    fig.update_layout(template='plotly_dark', title=title,
                       plot_bgcolor='#23272c', paper_bgcolor='#23272c', yaxis_title=measurement,
                       xaxis_title='Date/Time')
     return fig
