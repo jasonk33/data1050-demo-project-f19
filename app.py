@@ -31,11 +31,11 @@ def page_header():
                  className="ten columns"),
         html.A([html.Img(id='logo', src=app.get_asset_url('github.png'),
                          style={'height': '35px', 'paddingTop': '7%'}),
-                html.Span('Blownhither', style={'fontSize': '2rem', 'height': '35px', 'bottom': 0,
+                html.Span('Git Repo', style={'fontSize': '2rem', 'height': '35px', 'bottom': 0,
                                                 'paddingLeft': '4px', 'color': '#a3a7b0',
                                                 'textDecoration': 'none'})],
                className="two columns row",
-               href='https://github.com/blownhither/'),
+               href='https://github.com/jasonk33/data1050-demo-project-f19'),
     ], className="row")
 
 
@@ -206,9 +206,60 @@ def architecture_summary():
     ], className='row')
 
 
+def about_page():
+    """
+    Returns the text and image of architecture summary of the project.
+    """
+    return html.Div(children=[
+        dcc.Markdown('''
+            # About
+
+        ''', className='row eleven columns', style={'paddingLeft': '5%'})], className='row')
+
+
+def additional_description_page():
+    """
+    Returns the text and image of architecture summary of the project.
+    """
+    return html.Div(children=[
+        dcc.Markdown('''
+            # Additional Project Details
+            ### Development Process and Final Technology Stack
+            The site was created by taking the example demo project, and slowly replacing all the components with our own. 
+            Python was used for all development, plotly for visualizations, mongodb for storing data, and dash for creating the site.
+            ### Data Acquisition, Caching, ETL Processing, Database Design
+            The data is accessed by scraping [Open Wather](https://openweathermap.org/api) every minute. 
+            It is stored in a mongodb, inserting datapoints only if they are new data. 
+            We filter the raw data before inserting into the databse.
+            We are using a classic mongodb, using one database and mutliple collections.
+            Since our data is nested by nature, we are have a collection for each city's data.
+            ### [EDA](https://drive.google.com/drive/folders/1k_bZkAHd2JDkdxr-9lL5zBqMbI0PwPuh?usp=sharing)
+            ### [Enhancements](https://drive.google.com/drive/folders/1xdRiKLsl-Qf9CjiESRmIfTm6_atbUnlS?usp=sharing)
+
+        ''', className='row eleven columns', style={'paddingLeft': '5%'})], className='row')
+
+
+tabs_styles = {
+    'height': '69px'
+}
+tab_style = {
+    'borderBottom': '1px solid #d6d6d6',
+    'padding': '6px',
+    'backgroundColor': 'gray',
+    'fontSize': '30px'
+}
+
+tab_selected_style = {
+    'borderTop': '1px solid #d6d6d6',
+    'borderBottom': '1px solid #d6d6d6',
+    'backgroundColor': '#119DFF',
+    'color': 'white',
+    'padding': '6px',
+    'fontWeight': 'bold',
+    'fontSize': '30px'
+}
+
 # Sequentially add page components to the app's layout
-
-
 app.layout = html.Div([
     page_header(),
     html.Hr(),
@@ -219,15 +270,15 @@ app.layout = html.Div([
     # what_if_tool(),
     dcc.Tabs([
         dcc.Tab(
-            label="Project", children=[what_if_tool_weather()]
+            label="Project", children=[what_if_tool_weather()], style=tab_style, selected_style=tab_selected_style
         ),
         dcc.Tab(
-            label="About", children=[architecture_summary()]
+            label="About", children=[about_page()], style=tab_style, selected_style=tab_selected_style
         ),
         dcc.Tab(
-            label="Addition Description", children=[architecture_summary()]
+            label="Addition Description", children=[additional_description_page(), architecture_summary()], style=tab_style, selected_style=tab_selected_style
         )
-    ]),
+    ], style=tabs_styles),
     # what_if_tool_weather(),
     # architecture_summary(),
 
