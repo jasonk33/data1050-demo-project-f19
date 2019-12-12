@@ -217,8 +217,27 @@ app.layout = html.Div([
     # dcc.Graph(id='stacked-trend-graph', figure=static_stacked_trend_graph(stack=True)),
     # what_if_description(),
     # what_if_tool(),
-    what_if_tool_weather(),
-    architecture_summary(),
+    dcc.Tabs([
+        dcc.Tab(
+            label="Project", children=[what_if_tool_weather()]
+        ),
+        dcc.Tab(
+            label="About", children=[architecture_summary()]
+        ),
+        dcc.Tab(
+            label="Addition Description", children=[architecture_summary()]
+        )
+    ]),
+    # what_if_tool_weather(),
+    # architecture_summary(),
+
+    # dcc.Tabs(id="tabs-example", value='project', children=[
+    #     dcc.Tab(label='project', value='project'),
+    #     dcc.Tab(label='about', value='about'),
+    # ]),
+    # html.Div(id='tabs-content-example'),
+
+    
 ], className='row', id='content')
 
 
