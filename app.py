@@ -122,8 +122,8 @@ def additional_description_page():
             We filter the raw data before inserting into the databse.
             We are using a classic mongodb, using one database and mutliple collections.
             Since our data is nested by nature, we are have a collection for each city's data.
-            ### [EDA](https://drive.google.com/drive/folders/1k_bZkAHd2JDkdxr-9lL5zBqMbI0PwPuh?usp=sharing)
-            ### [Enhancements](https://drive.google.com/drive/folders/1xdRiKLsl-Qf9CjiESRmIfTm6_atbUnlS?usp=sharing)
+            ### [EDA](https://drive.google.com/open?id=1IkowKFI3xCayZHchbcofgmqnkyPbh-fv)
+            ### [Enhancements](https://drive.google.com/file/d/12yFPiA6Nh6PEcan_W5L-uHG68bkeciH2/view?usp=sharing)
 
         ''', className='row eleven columns', style={'paddingLeft': '5%'})], className='row')
 
