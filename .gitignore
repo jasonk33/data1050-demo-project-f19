@@ -20,3 +20,4 @@
 !doc/*.png
 !.gitpod.dockerfile
 !weather_data.json
+!assets/*.png

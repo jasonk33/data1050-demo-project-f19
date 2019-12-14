@@ -102,8 +102,71 @@ def about_page():
     return html.Div(children=[
         dcc.Markdown('''
             # About
+            ### Project Summary 
+            Hello! You have reached the website engineered by 4 Data Science students at Brown University! 
+            ** Our project is a visualization website, that uses a live weather API to visualize different features of the weather data. **
+            The most prominent features are choosing among 4 cities: Providence, Miami, Dallas and Seattle. 
+            Once selected, the visualization will show 4 main variables for the city, with almost no lag time! 
+            The 4 variables we display are: ** temperature, wind speed, % of humidity and pressure. **
+            The web-app allows the simultaneous plotting of multiple variables on the same visualization for detailed analysis. 
+            The project also comes with its own set of outlooks. If we had the resources to build a more thorough project, 
+            we would have incorporated the live traffic data from TOMTOM.com, to create a predictive model on how weather effects traffic! 
+            ### Datasets used
+            ** Main Product: ** We used a weather dataset from openweathermap.org, a live API. 
+            The dataset has the following  features: wind speed, % of humidity, temperature in Farenheits, and pressure. 
+            In terms of visualization, we were lucky that all of the value were more or less capped at 100, 
+            allowing a single scale to be deployed for all visualizations. 
 
-        ''', className='row eleven columns', style={'paddingLeft': '5%'})], className='row')
+            ** Enhancements: ** Our main goal in the enhancements section is to engineer a ML model that uses the weather features to 
+            predict traffic volume (UNIT: cars on the road) for a given hour. Thus, we needed to find a live API that would feed 
+            us the Traffic Volume for a given geography at any given time. However, most of such APIs charge the user per pull. 
+            Thus, we had to settle for a static project. We used the traffic data from 2014 for the DC Area, provided hourly by 
+            [ArcGIS Hub](https://hub.arcgis.com/datasets/882515f07d3346c0a0c6c9672a93b8f1_8). 
+            After an initial cleaning of the data, it became clear that we had approximately 50 days that didn’t have not-missing 24 hour data. 
+            We used the weather API to pull out data from 2014, for the DC area. However, the weather dataset also had missing data. 
+            Thus, after comparing the days with uninterrupted hourly data from both traffic and weather datasets, we pulled out the days that 
+            had uninterrupted data (which was 6 days).
+            ### Summary of performance with respect to the baseline model(s)
+            There are three models deployed in our predictive analysis: ARIMA Forecasting, Random Forest and XGBoost Regression. 
+            The baseline model for ARIMA forecast is the mean value of the target variable, giving us a 26,949.49 as MSE. 
+            RandomForest and XGBoost use a dummy regression as the baseline model. Dummy MSE is 586,990,934.56 or 24,227.90 if we take 
+            the square root of it. When we take the square roots of the RandomForest and XGBoost algorithm MSEs, we get 4,352.76 
+            and 6,211.07, respectively. Therefore we can conclude that while ARIMA under performs (worse than the dummy regression), 
+            both RandomForest and XGBoost performs significantly better than the baseline model.
+            ### Possible next steps
+            Some possible next steps are:
+
+            Using the upcoming GITPOD feature that will allow you to run your pod uninterrupted as long as you want. 
+            This would allow the data to be pulled out of the API seamlessly. 
+
+            Using a live traffic data API to pull out live traffic data. 
+            This would allow the website to make predictions about traffic volume about the coming hour, given this hour’s data points. 
+            ### References to related work
+            #### [Bad weather and flight delays: The impact of sudden and slow onset weather events](https://www.sciencedirect.com/science/article/pii/S2212012218300753)
+            This paper analyzes how weather affects flight departures, and has over 2 million rows of data. 
+            A “difference-in-difference” method was used to make predictions at the hourly level. 
+            This paper concluded the weather and disturbance-intensity can delay departures up to 23 minutes. 
+            #### [Impact of Weather Conditions on Macroscopic Urban Travel Times](https://www.sciencedirect.com/science/article/pii/S0966692312002694)
+            This paper not only proved that rain and snow increase travel times, but even took it one step further by looking at how 
+            the intensities of rain and snow can make a difference. For example, “light” rain, “moderate” rain, and “heavy rain” 
+            increase travel time respectively, by: 0.1 - 2.1%, 1.5 - 3.8%, and 4.0 - 6.0%. Similarly, “light” snow and “heavy” snow 
+            lead to an increase of: 5.5 - 7.6% and 7.4 - 11.4%, respectively. 
+            #### [A Deep Hybrid Model for Weather Forecasting](https://aditya-grover.github.io/files/publications/kdd15.pdf)
+            This paper explains how they forecast weather with meteorological data by looking at features that relate to space and time. 
+            #### [Climate coupling between temperature, humidity, precipitation, and cloud cover over the Canadian Prairies](http://www.uvm.edu/~bbeckage/Manuscripts/Bettsetal2014b-10.1002_2014JD022511.pdf)
+            This paper has over 50 years of atmospheric data to analyze climate coupling in warm seasons at a monthly, seasonal, 
+            and long-term level. 
+            ### Names of all team members 
+            David Kebudi
+        ''', className='row eleven columns', style={'paddingLeft': '5%'}),
+        html.Img(src=app.get_asset_url('team_member_images/David.png'),className='row'),
+        dcc.Markdown('''Jason Katz'''),
+        html.Img(src=app.get_asset_url('team_member_images/Jason.png'),className='row'),
+        dcc.Markdown('''Kevin Qualls'''),
+        html.Img(src=app.get_asset_url('team_member_images/Kevin.png'),className='row'),
+        dcc.Markdown('''Guanhua Zhu'''),
+        html.Img(src=app.get_asset_url('team_member_images/Peter.png'),className='row')], 
+        className='row')
 
 
 def additional_description_page():
